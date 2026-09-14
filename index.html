@@ -1,0 +1,28 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Ear Model</title><link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+  <h1>Outer + Middle Ear Models</h1>
+  <div class="layout">
+    <div class="main-col">
+    <div id="toggles"></div>
+    <canvas id="plot" width="900" height="400"></canvas>
+    <canvas id="zplot" width="900" height="180"></canvas>
+    <canvas id="phaseplot" width="900" height="180"></canvas>
+    <div id="readout"></div>
+    <div class="transport">
+      <button id="play-model">Play ear model</button>
+      <button id="play-flat">Play flat (bypass)</button>
+      <button id="stop">Stop</button>
+    </div>
+  </div>
+  <div id="controls"></div>
+  </div>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="audio.js"></script>
+  
+</body>
+</html>

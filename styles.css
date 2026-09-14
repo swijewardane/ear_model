@@ -1,0 +1,146 @@
+:root {
+    --bg: #f7f7f5;
+    --panel: #ffffff;
+    --border: #dcdcd6;
+    --text: #1a1a1a;
+    --text-dim: #6b6b66;
+    --accent: #2d5f8a;
+    --mono: 'SF Mono', 'Consolas', monospace;
+    --sans: -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 1.5rem;
+}
+
+h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: var(--text);
+}
+
+/* the core fix: plot + sidebar side by side, sliders live next to the
+   curve they control instead of scrolled away below it */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+  align-items: start;
+  max-width: 1200px;
+}
+
+.main-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+#toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.25rem;
+  font-size: 0.85rem;
+  padding: 0.6rem 0.8rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+#toggles label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+#plot {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#zplot, #phaseplot {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#readout {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+}
+
+.transport {
+  display: flex;
+  gap: 0.5rem;
+}
+.transport button {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.transport button:hover { border-color: var(--accent); }
+.transport button:active { background: var(--bg); }
+
+/* sidebar: sliders in a scrollable column next to the plot, not below it */
+#controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-height: 640px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+fieldset {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.7rem 0.8rem 0.8rem;
+  margin: 0;
+  background: var(--panel);
+}
+legend {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0 0.3rem;
+}
+
+fieldset label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin-top: 0.5rem;
+}
+fieldset label:first-of-type { margin-top: 0; }
+fieldset label span {
+  font-family: var(--mono);
+  color: var(--text);
+  float: right;
+}
+
+input[type="range"] {
+  width: 100%;
+  margin-top: 0.25rem;
+  accent-color: var(--accent);
+}

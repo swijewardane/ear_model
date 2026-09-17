@@ -1,5 +1,6 @@
 import { buildHRIR } from './hrtf.js';
 import { defaultEarParams } from './hrtf.js';
+import { binauralState } from './app.js';
 
 let ctx, source;
 

@@ -1,6 +1,7 @@
 import {stages} from './stages.js';
 import {reflectorFc, reflectorDB, cavityFH, cavityDB, canalModes, canalDB, pinnaNotch1, pinnaDB, pinnaR} from './physics.js';
 import {middleEarResponse, middleEarParams, cMag, cPhaseDeg } from './middle_ear.js';
+import { buildHRIR, itdSeconds, defaultEarParams } from './hrtf.js';
 
 const state = {};
 stages.forEach(s => {state[s.id] = {}; s.params.forEach(p => state[s.id][p.key] = p.value);});
@@ -168,3 +169,67 @@ curves.forEach(c => {
 redraw();
 plotMiddleEar();
 export { totalDB, fvec, combinedDB, plotMiddleEar };
+
+const binauralState = {az: 30, el: 0};
+const N_HRTF = 1024; const fs = 44100;
+
+const hrtfCanvas = document.getElementById('hrtfPlot');
+const hrtfCtx = hrtfCanvas.getContext('2d');
+const ildCanvas = document.getElementById('ildPlot');
+const ildCtx = ildCanvas.getContext('2d');
+
+function freqBins(N, fs) {
+  // only need k=0..N/2 (positive-frequency half) for these plots
+  return Array.from({ length: N/2 + 1 }, (_, k) => (k / N) * fs);
+}
+const hrtfFreqs = freqBins(N_HRTF, fs_HRTF).slice(1);
+
+function drawTwoCurves(ctx, canvas, fvec, fn1, fn2, yLo, yHi, color1, color2, label1, label2) {
+  const xp = f => ((Math.log10(f) - Math.log10(xMin)) / (Math.log10(xMax) - Math.log10(xMin))) * canvas.width;
+  const yp = v => canvas.height - ((v - yLo) / (yHi - yLo)) * canvas.height;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  [20,50,100,200,500,1000,2000,5000,10000,20000].forEach(f => {
+    ctx.strokeStyle = '#ddd'; ctx.beginPath();
+    ctx.moveTo(xp(f), 0); ctx.lineTo(xp(f), canvas.height); ctx.stroke();
+  });
+  [[valsA, colorA], [valsB, colorB]].forEach(([vals, color]) => {
+    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
+    freqs.forEach((f, i) => {
+      const x = xp(f), y = yp(vals[i]);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  });
+  ctx.fillStyle = colorA; ctx.font = '11px sans-serif'; ctx.fillText(labelA, 6, 14);
+  ctx.fillStyle = colorB; ctx.fillText(labelB, 6, 28);
+}
+
+function plotBinaural() {
+  const hrir = buildHRIR(binauralState.az, binauralState.el, defaultEarParams, N_HRTF, fs_HRTF);
+  const magsL = hrtfFreqs.map((f, i) => 20 * Math.log10(cMag((HL[i + 1]))));
+  const magsR = hrtfFreqs.map((f, i) => 20 * Math.log10(cMag((HR[i + 1]))));
+  const ild = magsL.map((v, i) => v - magsR[i]);
+
+  const allMags = [...magsL, ...magsR];
+
+  drawTwoCurves(hrtfCtx, hrtfCanvas, hrtfFreqs, magsL, '#2d5f8a', 'Left', magsR, '#c0392b', 'Right',
+    Math.min(...allMags) - 3, Math.max(...allMags) + 3);
+  drawTwoCurves(ildCtx, ildCanvas, hrtfFreqs, ild, '#9b59b6', 'ILD (L-R, dB)', ild, 'transparent', '',
+    Math.min(...ild) - 3, Math.max(...ild) + 3);
+
+  const itdMs = itdSeconds(binauralState.az, defaultEarParams.headRadiusCm) * 1000;
+  document.getElementById('binauralReadout').textContent =
+    `az=${binauralState.az}° el=${binauralState.el}° | ITD: ${itdMs.toFixed(3)} ms`;
+}
+
+['az', 'el'].forEach(key => {
+  const input = document.getElementById(`binaural-${key}`);
+  input.oninput = () => {
+    binauralState[key] = parseFloat(input.value);
+    document.getElementById(`binaural-${key}-val`).textContent = input.value;
+    plotBinaural();
+  };
+});
+
+plotBinaural();
+export { binauralState, plotBinaural };

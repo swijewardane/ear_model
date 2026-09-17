@@ -43,7 +43,7 @@ function canalDB(f, LCm, Q, peakGain, notchGain) {
   return (
     lorentz(f, m[0], Q, peakGain) +
     lorentz(f, m[2], Q, peakGain * 0.6) +
-    lorentz(f, m[4], Q, peakGain * 0.35) -
+    lorentz(f, m[4], Q, peakGain * 0.45) -
     lorentz(f, m[1], Q, notchGain) -
     lorentz(f, m[3], Q, notchGain * 0.6)
   );

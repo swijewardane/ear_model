@@ -5,18 +5,28 @@
 
 </head>
 <body>
-  <h1>Outer + Middle Ear Models</h1>
+  <h1>Outer + Middle Ear Models with HRTF</h1>
   <div class="layout">
     <div class="main-col">
     <div id="toggles"></div>
     <canvas id="plot" width="900" height="400"></canvas>
     <canvas id="zplot" width="900" height="180"></canvas>
     <canvas id="phaseplot" width="900" height="180"></canvas>
+    <h2>Binaural (HRTF/HRIR)</h2>
+<label>Azimuth <span id="binaural-az-val">30</span>°<br>
+  <input id="binaural-az" type="range" min="-180" max="180" step="1" value="30"></label>
+<label>Elevation <span id="binaural-el-val">0</span>°<br>
+  <input id="binaural-el" type="range" min="-90" max="90" step="1" value="0"></label>
+<div id="binauralReadout" style="font-family: var(--mono); margin: 0.3rem 0;"></div>
+<canvas id="hrtfPlot" width="900" height="200"></canvas>
+<canvas id="ildPlot" width="900" height="150"></canvas>
     <div id="readout"></div>
     <div class="transport">
       <button id="play-model">Play ear model</button>
       <button id="play-flat">Play flat (bypass)</button>
       <button id="stop">Stop</button>
+      <button id="play-binaural">Play binaural (noise, current az/el)</button>
+      <button id="stop-binaural">Stop</button>
     </div>
   </div>
   <div id="controls"></div>

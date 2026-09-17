@@ -72,7 +72,7 @@ function makeHRTF(f, azDeg, elDeg, p) {
     };
 }
 
-export {makeHRTF, itdSeconds, headShadow};
+
 
 function ifftreal(H) {
     const N = H.length, h = new Float32Array(N);
@@ -99,3 +99,12 @@ function buildHRIR(azDeg, elDeg, p, N, fs) {
     return {HL: ifftreal(HL), HR: ifftreal(HR), HR, HL};
 }
 
+const defaultEarParams = {
+    headRadiusCm: 8.75,
+    reflector: {a: 1.0},
+    cavity: {V: 1.0, ar: 0.7, nl: 0.3, Q: 3.0, gain: 9.0},
+    canal: {L: 2.7, Q: 4.0, peakGain: 9.0, notchGain: 9.0},
+    pinna: {rmax: 2.0, rho: 0.6}
+}
+
+export {makeHRTF, itdSeconds, headShadow, defaultEarParams, buildHRIR, ifftreal};

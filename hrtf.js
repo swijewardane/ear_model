@@ -37,7 +37,7 @@ function complexResonance(f, fn, Q, gain) {
 
 import { reflectorFc, reflectorDB, cavityFH, cavityDB, canalModes, canalDB, pinnaNotch1, pinnaDB, pinnaR} from "./physics.js";
 
-import { cAdd, cMul, cDiv, cPar, cMag, cPhaseDeg } from './complex.js';
+import { cAdd, cMul, cPar, cMag, cPhaseDeg } from './complex.js';
 
 function reflectorComplex(f, aCm) {
     return {re: Math.pow(10, reflectorDB(f, aCm)/20), im: 0};

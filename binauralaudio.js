@@ -79,6 +79,11 @@ async function playBinaural(azDeg, elDeg) {
     const data = rendered.getChannelData(ch);
     for (let i = 0; i < data.length; i++) data[i] = (data[i] / (peak || 1)) * 0.2;
   }
+
+  source = ctx.createBufferSource();
+  source.buffer = rendered;
+  source.connect(ctx.destination);
+  source.start();
 }
 
 function downloadBinaural() {
@@ -92,10 +97,7 @@ function downloadBinaural() {
   URL.revokeObjectURL(url);
 }
 
-  source = ctx.createBufferSource();
-  source.buffer = rendered;
-  source.connect(ctx.destination);
-  source.start();
+
 
 
 document.getElementById('play-binaural').onclick = () => playBinaural(binauralState?.az ?? 30, binauralState?.el ?? 0);

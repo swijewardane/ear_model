@@ -64,8 +64,11 @@ function makeHRTF(f, azDeg, elDeg, p) {
     const pinnaL = pinnaComplex(f, pinnaR(azDeg, elDeg, p.pinna.rmax), p.pinna.rho);
     const pinnaRc = pinnaComplex(f, pinnaR(-azDeg, elDeg, p.pinna.rmax), p.pinna.rho);
     const itd = itdSeconds(azDeg, p.headRadiusCm);
-    const delayL = {re: Math.cos(2*Math.PI*f*itd/2), im: Math.sin(2*Math.PI*f*itd/2)};
-    const delayR = {re: Math.cos(-2*Math.PI*f*itd/2), im: Math.sin(-2*Math.PI*f*itd/2)};
+    const preDelay = 0.001;
+    const delayLSeconds = preDelay + itd/2;
+    const delayRSeconds = preDelay - itd/2;
+    const delayL = {re: Math.cos(-2*Math.PI*f*delayLSeconds), im: Math.sin(-2*Math.PI*f*delayLSeconds)};
+    const delayR = {re: Math.cos(-2*Math.PI*f*delayRSeconds), im: Math.sin(-2*Math.PI*f*delayRSeconds)};
     return {
         HL: cMul(cMul(cMul(nonDir, shadowL), pinnaL), delayL),
         HR: cMul(cMul(cMul(nonDir, shadowR), pinnaRc), delayR)

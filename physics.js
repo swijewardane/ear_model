@@ -68,6 +68,7 @@ function pinnaDB(f, rCm, rho) {
 function pinnaR(azDeg, elDeg, rmaxCm) {
   const az = (azDeg * Math.PI) / 180;
   const el = (elDeg * Math.PI) / 180;
+  // const elR = (40 * Math.PI) / 180; 
   return rmaxCm * (1 - Math.cos(az)) * Math.cos(el);
 }
 

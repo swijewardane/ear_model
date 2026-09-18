@@ -13,13 +13,14 @@
     <canvas id="zplot" width="900" height="180"></canvas>
     <canvas id="phaseplot" width="900" height="180"></canvas>
     <h2>Binaural (HRTF/HRIR)</h2>
-<label>Azimuth <span id="binaural-az-val">30</span>°<br>
-  <input id="binaural-az" type="range" min="-180" max="180" step="1" value="30"></label>
-<label>Elevation <span id="binaural-el-val">0</span>°<br>
-  <input id="binaural-el" type="range" min="-90" max="90" step="1" value="0"></label>
-<div id="binauralReadout" style="font-family: var(--mono); margin: 0.3rem 0;"></div>
-<canvas id="hrtfPlot" width="900" height="200"></canvas>
-<canvas id="ildPlot" width="900" height="150"></canvas>
+      <label>Azimuth <span id="binaural-az-val">30</span>°<br>
+      <input id="binaural-az" type="range" min="-180" max="180" step="1" value="30"></label>
+      <label>Elevation <span id="binaural-el-val">0</span>°<br>
+      <input id="binaural-el" type="range" min="-90" max="90" step="1" value="0"></label>
+      <div id="binauralReadout" style="font-family: var(--mono); margin: 0.3rem 0;"></div>
+      <canvas id="hrtfPlot" width="900" height="200"></canvas>
+      <canvas id="ildPlot" width="900" height="150"></canvas>
+      <canvas id ="hrirPlot" width="900" height="200"></canvas>
     <div id="readout"></div>
     <div class="transport">
       <button id="play-model">Play ear model</button>
@@ -33,6 +34,8 @@
   </div>
   <script type="module" src="app.js"></script>
   <script type="module" src="audio.js"></script>
+  <script type="module" src="binauralaudio.js"></script>
+  <script type="module" src="hrtf.js"></script>
   
 </body>
 </html>

@@ -13,7 +13,7 @@ function designFIR(getGainDB, N, fs) {
   const h = new Float64Array(N);
   for (let n = 0; n < N; n++) {
     let sum = 0;
-    for (let k = 0; k <= N; k++) sum += mag[k] * Math.cos((2 * Math.PI * k * n) / N);
+    for (let k = 0; k < N; k++) sum += mag[k] * Math.cos((2 * Math.PI * k * n) / N);
     h[n] = sum / N;
   }
   const out = new Float32Array(N);
@@ -58,7 +58,7 @@ async function playModel(useModel) {
 }
 function stopAudio() {
   if (source) try { source.stop(); } catch (e) {}
-  if (ctx) ctx.close();
+  if (ctx) try {ctx.close();} catch (e) {}
 }
 
 document.getElementById('play-model').onclick = () => playModel(true);

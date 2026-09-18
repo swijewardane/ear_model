@@ -171,12 +171,14 @@ plotMiddleEar();
 export { totalDB, fvec, combinedDB, plotMiddleEar };
 
 const binauralState = {az: 30, el: 0};
-const N_HRTF = 1024; const fs = 44100;
+const N_HRTF = 1024; const fs_HRTF = 44100;
 
 const hrtfCanvas = document.getElementById('hrtfPlot');
 const hrtfCtx = hrtfCanvas.getContext('2d');
 const ildCanvas = document.getElementById('ildPlot');
 const ildCtx = ildCanvas.getContext('2d');
+const hrirCanvas = document.getElementById('hrirPlot');
+const hrirCtx = hrirCanvas.getContext('2d');
 
 function freqBins(N, fs) {
   // only need k=0..N/2 (positive-frequency half) for these plots
@@ -184,15 +186,27 @@ function freqBins(N, fs) {
 }
 const hrtfFreqs = freqBins(N_HRTF, fs_HRTF).slice(1);
 
-function drawTwoCurves(ctx, canvas, fvec, fn1, fn2, yLo, yHi, color1, color2, label1, label2) {
-  const xp = f => ((Math.log10(f) - Math.log10(xMin)) / (Math.log10(xMax) - Math.log10(xMin))) * canvas.width;
+function drawTwoCurves(ctx, canvas, freqs, valsA, colorA, labelA, valsB, colorB, labelB, yLo, yHi) {
+  const xp = f => ((Math.log10(f) - Math.log10(20)) / (Math.log10(20000) - Math.log10(20))) * canvas.width;
   const yp = v => canvas.height - ((v - yLo) / (yHi - yLo)) * canvas.height;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const ticks = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+  ticks.forEach(f => {
+    const x = xp(f);
+    ctx.strokeStyle = '#ddd'; ctx.beginPath();
+    ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    ctx.fillStyle = '#999'; ctx.font = '9px sans-serif';
+    const label = f >= 1000 ? `${f/1000}k` : `${f}`;
+    ctx.fillText(label, x + 2, canvas.height - 3);
+  });
+
   [20,50,100,200,500,1000,2000,5000,10000,20000].forEach(f => {
     ctx.strokeStyle = '#ddd'; ctx.beginPath();
     ctx.moveTo(xp(f), 0); ctx.lineTo(xp(f), canvas.height); ctx.stroke();
   });
   [[valsA, colorA], [valsB, colorB]].forEach(([vals, color]) => {
+    if (color === 'transparent') return;
     ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
     freqs.forEach((f, i) => {
       const x = xp(f), y = yp(vals[i]);
@@ -201,11 +215,38 @@ function drawTwoCurves(ctx, canvas, fvec, fn1, fn2, yLo, yHi, color1, color2, la
     ctx.stroke();
   });
   ctx.fillStyle = colorA; ctx.font = '11px sans-serif'; ctx.fillText(labelA, 6, 14);
-  ctx.fillStyle = colorB; ctx.fillText(labelB, 6, 28);
+  if (colorB !== 'transparent') { ctx.fillStyle = colorB; ctx.fillText(labelB, 6, 28); }
 }
 
+function drawHRIR(ctx, canvas, hL, hR, fs, windowMs) {
+  const nSamples = Math.min(hL.length, Math.round((windowMs / 1000) * fs));
+  const allVals = [...hL.slice(0, nSamples), ...hR.slice(0, nSamples)];
+  const yMax = Math.max(...allVals.map(Math.abs)) * 1.1 || 1;
+
+  const xp = n => (n / nSamples) * canvas.width;
+  const yp = v => canvas.height / 2 - (v / yMax) * (canvas.height / 2);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#ddd';
+  ctx.beginPath(); ctx.moveTo(0, canvas.height/2); ctx.lineTo(canvas.width, canvas.height/2); ctx.stroke();
+
+  [['#2d5f8a', hL, 'Left'], ['#c0392b', hR, 'Right']].forEach(([color, h, label], idx) => {
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.beginPath();
+    for (let n = 0; n < nSamples; n++) {
+      const x = xp(n), y = yp(h[n]);
+      n === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.fillStyle = color; ctx.font = '11px sans-serif';
+    ctx.fillText(label, 6, 14 + idx * 14);
+  });
+  ctx.fillStyle = '#666'; ctx.font = '10px sans-serif';
+  ctx.fillText(`0–${windowMs} ms`, canvas.width - 60, canvas.height - 6);
+}
+
+
 function plotBinaural() {
-  const hrir = buildHRIR(binauralState.az, binauralState.el, defaultEarParams, N_HRTF, fs_HRTF);
+  const {hL, hR, HL, HR} = buildHRIR(binauralState.az, binauralState.el, defaultEarParams, N_HRTF, fs_HRTF);
   const magsL = hrtfFreqs.map((f, i) => 20 * Math.log10(cMag((HL[i + 1]))));
   const magsR = hrtfFreqs.map((f, i) => 20 * Math.log10(cMag((HR[i + 1]))));
   const ild = magsL.map((v, i) => v - magsR[i]);
@@ -214,8 +255,9 @@ function plotBinaural() {
 
   drawTwoCurves(hrtfCtx, hrtfCanvas, hrtfFreqs, magsL, '#2d5f8a', 'Left', magsR, '#c0392b', 'Right',
     Math.min(...allMags) - 3, Math.max(...allMags) + 3);
-  drawTwoCurves(ildCtx, ildCanvas, hrtfFreqs, ild, '#9b59b6', 'ILD (L-R, dB)', ild, 'transparent', '',
-    Math.min(...ild) - 3, Math.max(...ild) + 3);
+  drawTwoCurves(ildCtx, ildCanvas, hrtfFreqs, ild, '#9b59b6', 'ILD (L-R, dB)', ild, 'transparent', 'dB',
+    -30, 30);
+  drawHRIR(hrirCtx, hrirCanvas, hL, hR, fs_HRTF, 3);
 
   const itdMs = itdSeconds(binauralState.az, defaultEarParams.headRadiusCm) * 1000;
   document.getElementById('binauralReadout').textContent =

@@ -44,14 +44,14 @@ function reflectorComplex(f, aCm) {
 }
 
 function nonDirectional(f, p) {
-    const m = canalModes(f, p.canal.L);
+    const m = canalModes(p.canal.L);
     const peaks = cMul(cMul(
         complexResonance(f, m[0], p.canal.Q, p.canal.peakGain),
-        complexResonance(f, m[2], p.canal.Q, p.canal.peakGain*0.6),
-        complexResonance(f, m[4], p.canal.Q, p.canal.peakGain*0.45)));
-    const notches = cMul(cMul(
+        complexResonance(f, m[2], p.canal.Q, p.canal.peakGain*0.6)),
+        complexResonance(f, m[4], p.canal.Q, p.canal.peakGain*0.45));
+    const notches = cMul(
         complexResonance(f, m[1], p.canal.Q, p.canal.notchGain),
-        complexResonance(f, m[3], p.canal.Q, p.canal.notchGain*0.6)));
+        complexResonance(f, m[3], p.canal.Q, p.canal.notchGain*0.6));
     const canalC = cDiv(peaks, notches);
     const cavC = complexResonance(f, cavityFH(p.cavity.V, p.cavity.ar, p.cavity.nl), p.cavity.Q, p.cavity.gain);
     return cMul(cMul(canalC, cavC), reflectorComplex(f, p.reflector.a));
@@ -59,8 +59,8 @@ function nonDirectional(f, p) {
 
 function makeHRTF(f, azDeg, elDeg, p) {
     const nonDir = nonDirectional(f, p);
-    const shadowL = headShadow(f, azDeg, -90, p.headradius);
-    const shadowR = headShadow(f, azDeg, 90, p.headradius);
+    const shadowL = headShadow(f, azDeg, -90, p.headRadiusCm);
+    const shadowR = headShadow(f, azDeg, 90, p.headRadiusCm);
     const pinnaL = pinnaComplex(f, pinnaR(azDeg, elDeg, p.pinna.rmax), p.pinna.rho);
     const pinnaRc = pinnaComplex(f, pinnaR(-azDeg, elDeg, p.pinna.rmax), p.pinna.rho);
     const itd = itdSeconds(azDeg, p.headRadiusCm);
@@ -96,7 +96,7 @@ function buildHRIR(azDeg, elDeg, p, N, fs) {
         HR.push(hr);
     }
     
-    return {HL: ifftreal(HL), HR: ifftreal(HR), HR, HL};
+    return {hL: ifftreal(HL), hR: ifftreal(HR), HL, HR};
 }
 
 const defaultEarParams = {

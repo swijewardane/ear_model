@@ -6,7 +6,7 @@ let ctx, source;
 
 function stopBinaural() {
   if (source) try { source.stop(); } catch (e) {}
-  if (ctx) ctx.close();
+  if (ctx) try {ctx.close();} catch (e) {}
 }
 
 async function playBinaural(azDeg, elDeg) {
@@ -14,6 +14,8 @@ async function playBinaural(azDeg, elDeg) {
   ctx = new (window.AudioContext || window.webkitAudioContext)();
   const fs = ctx.sampleRate, dur = 2;
   const { hL, hR } = buildHRIR(azDeg, elDeg, defaultEarParams, 1024, fs);
+
+  console.log(hL.slice(0, 10))
 
   const noiseBuf = ctx.createBuffer(1, fs * dur, fs);
   const noise = noiseBuf.getChannelData(0);
@@ -23,6 +25,7 @@ async function playBinaural(azDeg, elDeg) {
   const src = offline.createBufferSource();
   src.buffer = noiseBuf;
 
+  
   const irL = offline.createBuffer(1, hL.length, fs); irL.copyToChannel(new Float32Array(hL), 0);
   const irR = offline.createBuffer(1, hR.length, fs); irR.copyToChannel(new Float32Array(hR), 0);
   const convL = offline.createConvolver(); convL.normalize = false; convL.buffer = irL;

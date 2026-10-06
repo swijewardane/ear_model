@@ -1,13 +1,30 @@
 import { buildHRIR } from './hrtf.js';
 import { defaultEarParams } from './hrtf.js';
-import { binauralState } from './app.js';
+import { binauralState, onBinauralChange } from './app.js';
+import { LiveConvolver } from './engine.js';
 
-let ctx, source;
+const N = 1024;
+const engine = new LiveConvolver({channels: 2});
+const playBtn = document.getElementById('play-binaural');
 
-function stopBinaural() {
-  if (source) try { source.stop(); } catch (e) {}
-  if (ctx) try {ctx.close();} catch (e) {}
-}
+const build = fs => {
+  const { hL, hR } = buildHRIR(binauralState.az, binauralState.el, defaultEarParams, N, fs);
+  return { hL, hR };
+};
+
+const render = () => playBtn.classList.toggle('active', engine.running);
+engine.onStop = render;
+
+playBtn.onclick = async () => {
+  if (!engine.running) await engine.start();
+  engine.resetReference();
+  engine.request(build);
+  render();
+};
+document.getElementById('stop-binaural').onclick = () => engine.stop();
+
+onBinauralChange(() => { if (engine.running) engine.request(build);});
+
 
 function bufferToWav(buffer) {
   const numCh = buffer.numberOfChannels, len = buffer.length;
@@ -38,19 +55,14 @@ function bufferToWav(buffer) {
 
 let lastRendered = null;
 
-async function playBinaural(azDeg, elDeg) {
-  stopBinaural();
-  ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const fs = ctx.sampleRate, dur = 2;
-  const { hL, hR } = buildHRIR(azDeg, elDeg, defaultEarParams, 1024, fs);
+async function renderBinaural(azDeg, elDeg, fs=44100, dur=2) {
+  const { hL, hR } = buildHRIR(azDeg, elDeg, defaultEarParams, N, fs);
+  const offline = new OfflineAudioContext(2, fs * (dur + 1), fs);
 
-  console.log(hL.slice(0, 50))
-
-  const noiseBuf = ctx.createBuffer(1, fs * dur, fs);
+  const noiseBuf = offline.createBuffer(1, fs * dur, fs);
   const noise = noiseBuf.getChannelData(0);
   for (let i = 0; i < noise.length; i++) noise[i] = Math.random() * 2 - 1;
 
-  const offline = new OfflineAudioContext(2, fs * (dur + 1), fs);
   const src = offline.createBufferSource();
   src.buffer = noiseBuf;
 
@@ -67,39 +79,24 @@ async function playBinaural(azDeg, elDeg) {
   src.start();
 
   const rendered = await offline.startRendering();
-
-  lastRendered = rendered; // store for potential download
-  // peak-normalize across both channels together, so ILD is preserved
+// Peak-normalize the rendered audio
   let peak = 0;
-  for (let ch = 0; ch < 2; ch++) {
+  for (let ch=0; ch<2; ch++) {
     const data = rendered.getChannelData(ch);
-    for (let i = 0; i < data.length; i++) peak = Math.max(peak, Math.abs(data[i]));
+    for (let i = 0; i<data.length; i++) {
+      data[i] = (data[i] / (peak || 1)) * 0.2;  
+    }
   }
-  for (let ch = 0; ch < 2; ch++) {
-    const data = rendered.getChannelData(ch);
-    for (let i = 0; i < data.length; i++) data[i] = (data[i] / (peak || 1)) * 0.2;
-  }
-
-  source = ctx.createBufferSource();
-  source.buffer = rendered;
-  source.connect(ctx.destination);
-  source.start();
+  return rendered;
 }
 
-function downloadBinaural() {
-  if (!lastRendered) return;
-  const blob = bufferToWav(lastRendered);
+document.getElementById('download-binaural').onclick = async () => {
+  const {az, el} = binauralState;
+  const blob = bufferToWav(await renderBinaural(az, el));
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `binaural_az${binauralState.az}_el${binauralState.el}.wav`;
+  a.download = `binaural_az${az}_el${el}.wav`;
   a.click();
-  URL.revokeObjectURL(url);
-}
-
-
-
-
-document.getElementById('play-binaural').onclick = () => playBinaural(binauralState?.az ?? 30, binauralState?.el ?? 0);
-document.getElementById('stop-binaural').onclick = stopBinaural;
-document.getElementById('download-binaural').onclick = downloadBinaural;
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};

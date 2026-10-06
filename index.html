@@ -1,42 +1,65 @@
-<!-- index.html -->
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>Ear Model</title><link rel="stylesheet" href="styles.css">
-
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ear Model</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Outer + Middle Ear Models with HRTF</h1>
+  <header>
+    <h1>Outer + Middle Ear Model with HRTF</h1>
+    <p class="sub">Start playback, then drag any slider: the filter updates live, no restart needed.</p>
+  </header>
+
   <div class="layout">
-    <div class="main-col">
-    <div id="toggles"></div>
-    <canvas id="plot" width="900" height="400"></canvas>
-    <canvas id="zplot" width="900" height="180"></canvas>
-    <canvas id="phaseplot" width="900" height="180"></canvas>
-    <h2>Binaural (HRTF/HRIR)</h2>
-      <label>Azimuth <span id="binaural-az-val">30</span>°<br>
-      <input id="binaural-az" type="range" min="-180" max="180" step="1" value="30"></label>
-      <label>Elevation <span id="binaural-el-val">0</span>°<br>
-      <input id="binaural-el" type="range" min="-90" max="90" step="1" value="0"></label>
-      <div id="binauralReadout" style="font-family: var(--mono); margin: 0.3rem 0;"></div>
-      <canvas id="hrtfPlot" width="900" height="200"></canvas>
-      <canvas id="ildPlot" width="900" height="150"></canvas>
-      <canvas id ="hrirPlot" width="900" height="200"></canvas>
-    <div id="readout"></div>
-    <div class="transport">
-      <button id="play-model">Play ear model</button>
-      <button id="play-flat">Play flat (bypass)</button>
-      <button id="stop">Stop</button>
-      <button id="play-binaural">Play binaural (noise, current az/el)</button>
-      <button id="stop-binaural">Stop</button>
-      <button id="download-binaural">Download last binaural render (.wav)</button>
-    </div>
+    <main class="main-col">
+      <section class="card transport">
+        <div class="group">
+          <span class="group-label">Ear model</span>
+          <button id="play-model">Play ear model</button>
+          <button id="play-flat">Play flat (bypass)</button>
+          <button id="stop">Stop</button>
+        </div>
+        <div class="group">
+          <span class="group-label">Binaural</span>
+          <button id="play-binaural">Play binaural</button>
+          <button id="stop-binaural">Stop</button>
+          <button id="download-binaural">Download .wav</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div id="toggles"></div>
+        <canvas id="plot" width="900" height="400"></canvas>
+        <div id="readout"></div>
+      </section>
+
+      <section class="card">
+        <canvas id="zplot" width="900" height="220"></canvas>
+        <canvas id="phaseplot" width="900" height="220"></canvas>
+      </section>
+
+      <section class="card">
+        <h2>Binaural (HRTF / HRIR)</h2>
+        <div class="binaural-sliders">
+          <label>Azimuth <span id="binaural-az-val">30</span>&deg;
+            <input id="binaural-az" type="range" min="-180" max="180" step="1" value="30"></label>
+          <label>Elevation <span id="binaural-el-val">0</span>&deg;
+            <input id="binaural-el" type="range" min="-90" max="90" step="1" value="0"></label>
+        </div>
+        <div id="binauralReadout"></div>
+        <canvas id="hrtfPlot" width="900" height="220"></canvas>
+        <canvas id="ildPlot" width="900" height="170"></canvas>
+        <canvas id="hrirPlot" width="900" height="220"></canvas>
+      </section>
+    </main>
+
+    <aside id="controls"></aside>
   </div>
-  <div id="controls"></div>
-  </div>
+
   <script type="module" src="app.js"></script>
   <script type="module" src="audio.js"></script>
   <script type="module" src="binauralaudio.js"></script>
-  <script type="module" src="hrtf.js"></script>
-  
 </body>
 </html>

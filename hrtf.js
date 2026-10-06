@@ -1,4 +1,5 @@
 import { cDiv } from './complex.js';
+import { fft } from './fft.js';
 
 const c0 = 343;
 
@@ -78,16 +79,10 @@ function makeHRTF(f, azDeg, elDeg, p) {
 
 
 function ifftreal(H) {
-    const N = H.length, h = new Float32Array(N);
-    for (let n = 0; n < N; n++) {
-        let re = 0;
-        for (let k = 0; k < N; k++) {
-            const th = (2 * Math.PI * k * n) / N;
-            re += H[k].re * Math.cos(th) - H[k].im * Math.sin(th);
-        }
-        h[n] = re / N;
-    }
-    return h;
+    const re = Float64Array.from(H, c => c.re);
+    const im = Float64Array.from(H, c => c.im);
+    fft(re, im, true);
+    return Float32Array.from(re);
 }
 
 function buildHRIR(azDeg, elDeg, p, N, fs) {

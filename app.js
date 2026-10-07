@@ -6,7 +6,10 @@ import { initCanvas, drawAxes, drawCurve, drawLegend, onThemeChange, theme, cssC
 
 // ---------- change notifications (the audio modules subscribe to these) ----------
 const listeners = { model: new Set(), binaural: new Set() };
-const emit = k => listeners[k].forEach(fn => fn());
+const emit = k => { 
+  // console.log('emit', k, 'listeners:', listeners[k].size);
+  listeners[k].forEach(fn => fn());
+}
 export const onModelChange = fn => listeners.model.add(fn);
 export const onBinauralChange = fn => listeners.binaural.add(fn);
 

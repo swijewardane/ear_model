@@ -82,7 +82,7 @@ export class LiveConvolver {
     }
 
     _apply(irs) {
-        //console.log(irs);
+        // console.log(irs);
         const ctx = this.ctx, fs = ctx.sampleRate, len = irs[0].length;
 
         const energy = irs.reduce((s, h) => s + h.reduce((a, v) => a + v * v, 0), 0) / irs.length;

@@ -1,4 +1,4 @@
-import { totalDB, combinedDB } from './app.js';
+import { totalDB, combinedDB , onModelChange} from './app.js';
 import { fft } from './fft.js';
 import { LiveConvolver } from './engine.js';
 
@@ -56,10 +56,11 @@ btn.model.onclick = () => play('model');
 btn.flat.onclick = () => play('flat');
 document.getElementById('stop').onclick = () => engine.stop();
 
-const onModelChange = () => {
+onModelChange (() => {
+  // console.log('model listener', 'running:', engine.running, 'mode:', mode);
   if (engine.running && mode === 'model') {
     engine.request(builders.model);
   }
-};
+});
 
 export {designFIR};

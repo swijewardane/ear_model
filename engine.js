@@ -46,6 +46,7 @@ export class LiveConvolver {
 
         this.refEnergy = null;
         this.src.start();
+        this.master.gain.value = 0;
         this.master.gain.setTargetAtTime(1, ctx.currentTime, 0.02);
         if (ctx.state == "suspended") await ctx.resume();
     }
@@ -107,7 +108,7 @@ export class LiveConvolver {
         merger.connect(gain).connect(this.bus);
 
         const t = ctx.currentTime + len/fs;
-        gain.gain.setTargetAtTime(1, ctx.currentTime, this.tau);
+        gain.gain.setTargetAtTime(1, t, this.tau);
         const old = this.voices;
         old.forEach(v => v.gain.gain.setTargetAtTime(0, t, this.tau));
         this.voices = [{gain, merger, convs, src}];

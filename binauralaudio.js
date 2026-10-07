@@ -83,6 +83,12 @@ async function renderBinaural(azDeg, elDeg, fs=44100, dur=2) {
   let peak = 0;
   for (let ch=0; ch<2; ch++) {
     const data = rendered.getChannelData(ch);
+    for (let i = 0; i < data.length; i++) {
+      peak = Math.max(peak, Math.abs(data[i]));
+    }
+  }
+  for (let ch=0; ch<2; ch++) {
+    const data = rendered.getChannelData(ch);
     for (let i = 0; i<data.length; i++) {
       data[i] = (data[i] / (peak || 1)) * 0.2;  
     }

@@ -5,7 +5,7 @@ function readTheme() {
     const s = getComputedStyle(document.documentElement);
     const g = n => s.getPropertyValue(n).trim();
     T = {
-        text: g('--text'), dim: g('--dim'), grid: g('--grid'),
+        text: g('--text'), dim: g('--text-dim'), grid: g('--grid'),
         axis: g('--axis'), panel: g('--panel'), font: g('--sans') 
     };
 }

@@ -14,7 +14,7 @@ function designFIR(getGainDB, N, fs) {
     if (k < half) re[N - k] = lin;
   }
   re[0] = re[1];
-  fft(re, im, inverse=true);
+  fft(re, im, true);
   const out = new Float32Array(N);
   for (let n = 0; n < N; n++) {
     const w = 0.54 - 0.46 * Math.cos((2 * Math.PI * n) / (N - 1));

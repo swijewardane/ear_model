@@ -9,7 +9,7 @@ const playBtn = document.getElementById('play-binaural');
 
 const build = fs => {
   const { hL, hR } = buildHRIR(binauralState.az, binauralState.el, defaultEarParams, N, fs);
-  return { hL, hR };
+  return [ hL, hR ];
 };
 
 const render = () => playBtn.classList.toggle('active', engine.running);
